@@ -119,8 +119,9 @@ public class RegisterPanel extends JPanel {
 
         btnSeleccionarFoto.addActionListener(e -> {
             JFileChooser fileChooser = new JFileChooser();
+            fileChooser.setAcceptAllFileFilterUsed(false);
             fileChooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter(
-                "Imágenes (JPG, PNG)", "jpg", "jpeg", "png"));
+                "Images (JPG, PNG)", "jpg", "jpeg", "png"));
             
             if (fileChooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
                 rutaFotoSeleccionada[0] = fileChooser.getSelectedFile().getAbsolutePath();

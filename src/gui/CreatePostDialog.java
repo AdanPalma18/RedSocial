@@ -323,6 +323,7 @@ public class CreatePostDialog extends JDialog {
     // ─── FILE CHOOSER ─────────────────────────────────────────────
     private void abrirFileChooser() {
         JFileChooser chooser = new JFileChooser();
+        chooser.setAcceptAllFileFilterUsed(false);
         chooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter(
             "Images (JPG, PNG)", "jpg", "jpeg", "png"));
         if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {

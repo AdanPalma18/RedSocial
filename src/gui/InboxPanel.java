@@ -480,8 +480,9 @@ public class InboxPanel extends JPanel implements MessageBus.MessageListener {
         JButton btnImportar = new JButton("Importar Sticker (Imagen)");
         btnImportar.addActionListener(e -> {
             JFileChooser fc = new JFileChooser();
+            fc.setAcceptAllFileFilterUsed(false);
             fc.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter(
-                "Imágenes (.png, .jpg, .jpeg)", "png", "jpg", "jpeg"));
+                "Imágenes (PNG, JPG, JPEG)", "png", "jpg", "jpeg"));
             if (fc.showOpenDialog(dialog) == JFileChooser.APPROVE_OPTION) {
                 String ruta = fc.getSelectedFile().getAbsolutePath();
                 String nombre = fc.getSelectedFile().getName();

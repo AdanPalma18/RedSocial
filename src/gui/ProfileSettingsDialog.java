@@ -41,6 +41,9 @@ public class ProfileSettingsDialog extends JDialog {
         JButton btnCambiarFoto = new JButton("Cambiar foto");
         btnCambiarFoto.addActionListener(e -> {
             JFileChooser fc = new JFileChooser();
+            fc.setAcceptAllFileFilterUsed(false);
+            fc.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter(
+                "Imágenes (PNG, JPG, JPEG)", "png", "jpg", "jpeg"));
             if (fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
                 rutaNuevaFoto = fc.getSelectedFile().getAbsolutePath();
                 fotoStatus.setText("Nueva foto seleccionada");
