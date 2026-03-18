@@ -1,0 +1,29 @@
+# NetBeans Specific
+nbproject/private/
+build/
+dist/
+nbbuild/
+nbactions.xml
+nb-configuration.xml
+
+# Java Specific
+*.class
+*.jar
+*.war
+*.ear
+
+# Data Files
+src/persistence/*.ins
+persistence/*.ins
+users.ins
+posts.ins
+
+# OS Specific
+Thumbs.db
+.DS_Store
+
+# Temporary files
+*.log
+*.tmp
+INSTA_RAIZ/
+*.md
