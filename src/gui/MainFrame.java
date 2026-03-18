@@ -33,6 +33,7 @@ public class MainFrame extends JFrame {
         
         // Iniciar Servidor de Sockets local (Puerto 5000)
         services.SocketServer.getInstance().start();
+        services.SocketBusClient.getInstance().connect(this);
 
         cardLayout = new CardLayout();
         mainContainer = new JPanel(cardLayout);
@@ -75,6 +76,10 @@ public class MainFrame extends JFrame {
     }
 
     public void showPanel(String panelName) {
+        if (!panelName.equals("inbox")) {
+            inboxPanel.cerrarChatActual();
+        }
+        
         cardLayout.show(mainContainer, panelName);
 
         if (panelName.equals("login") || panelName.equals("register")) {

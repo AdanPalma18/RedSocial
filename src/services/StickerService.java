@@ -9,6 +9,7 @@ import java.util.List;
 public class StickerService {
     private static StickerService instance;
     private FileManager fileManager;
+    private java.util.Map<String, javax.swing.ImageIcon> iconCache = new java.util.HashMap<>();
 
     private StickerService() {
         fileManager = FileManager.getInstance();
@@ -112,7 +113,22 @@ public class StickerService {
         } catch (IOException e) {
             System.err.println("Error leyendo stickers personales: " + e.getMessage());
         }
-
         return stickers;
+    }
+
+    public javax.swing.ImageIcon getCachedIcon(String ruta, int size) {
+        String key = ruta + "_" + size;
+        if (iconCache.containsKey(key)) {
+            return iconCache.get(key);
+        }
+        
+        try {
+            javax.swing.ImageIcon icon = new javax.swing.ImageIcon(new javax.swing.ImageIcon(ruta).getImage()
+                .getScaledInstance(size, size, java.awt.Image.SCALE_SMOOTH));
+            iconCache.put(key, icon);
+            return icon;
+        } catch (Exception e) {
+            return null;
+        }
     }
 }

@@ -57,6 +57,7 @@ public class PostService {
             dos.writeUTF(contenido);
             dos.writeUTF(imagenFinal);
             dos.writeUTF(fecha);
+            dos.writeInt(0); // LikesCount inicial
             return true;
         } catch (IOException e) {
             System.err.println("Error creando publicación: " + e.getMessage());
@@ -77,7 +78,7 @@ public class PostService {
         }
     }
 
-    private void cargarComentariosParaPost(Publicacion post) {
+    public void cargarComentariosParaPost(Publicacion post) {
         String rutaComments = fileManager.getRutaUsuario(post.getAutor()) + "/comments.ins";
         File file = new File(rutaComments);
         if (!file.exists()) return;
@@ -99,6 +100,11 @@ public class PostService {
         } catch (IOException e) {
             System.err.println("Error cargando comentarios: " + e.getMessage());
         }
+    }
+
+    public void refrescarComentarios(Publicacion post) {
+        post.limpiarComentarios();
+        cargarComentariosParaPost(post);
     }
 
     public List<Publicacion> obtenerFeed(String username) {
@@ -138,8 +144,9 @@ public class PostService {
                 String contenido = dis.readUTF();
                 String imagenRuta = dis.readUTF();
                 String fecha = dis.readUTF();
+                int likes = dis.readInt();
 
-                Publicacion p = new Publicacion(autor, contenido, imagenRuta, fecha);
+                Publicacion p = new Publicacion(autor, contenido, imagenRuta, fecha, likes);
                 cargarComentariosParaPost(p);
                 publicaciones.add(p);
             }
@@ -192,5 +199,101 @@ public class PostService {
         }
 
         return resultados;
+    }
+
+    public int calcularInteraccionesRecursive(List<Publicacion> posts, int index) {
+        if (posts == null || index >= posts.size()) {
+            return 0;
+        }
+        return posts.get(index).getLikesCount() + calcularInteraccionesRecursive(posts, index + 1);
+    }
+
+    /**
+     * Actualiza los likes de una publicación en el archivo del usuario.
+     */
+    public void actualizarLikes(Publicacion post) {
+        String username = post.getAutor();
+        List<Publicacion> posts = obtenerPublicacionesUsuario(username);
+        
+        // Reemplazar la publicación en la lista por la actualizada
+        for (int i = 0; i < posts.size(); i++) {
+            if (posts.get(i).getFecha().equals(post.getFecha())) {
+                posts.set(i, post);
+                break;
+            }
+        }
+        
+        // Reescribir el archivo
+        String rutaInsta = fileManager.getRutaUsuario(username) + "/insta.ins";
+        try (DataOutputStream dos = new DataOutputStream(new FileOutputStream(rutaInsta))) {
+            for (Publicacion p : posts) {
+                dos.writeUTF(p.getAutor());
+                dos.writeUTF(p.getContenido());
+                dos.writeUTF(p.getImagenRuta() != null ? p.getImagenRuta() : "");
+                dos.writeUTF(p.getFecha());
+                dos.writeInt(p.getLikesCount());
+            }
+        } catch (IOException e) {
+            System.err.println("Error actualizando likes: " + e.getMessage());
+        }
+    }
+
+    public void registrarLike(String usuarioLogueado, Publicacion post) {
+        String rutaLikes = fileManager.getRutaUsuario(usuarioLogueado) + "/likes.ins";
+        try (DataOutputStream dos = new DataOutputStream(new FileOutputStream(rutaLikes, true))) {
+            dos.writeUTF(post.getAutor());
+            dos.writeUTF(post.getFecha());
+        } catch (IOException e) {
+            System.err.println("Error registrando like: " + e.getMessage());
+        }
+        actualizarLikes(post);
+    }
+
+    public void removerLike(String usuarioLogueado, Publicacion post) {
+        String rutaLikes = fileManager.getRutaUsuario(usuarioLogueado) + "/likes.ins";
+        File file = new File(rutaLikes);
+        if (!file.exists()) return;
+
+        List<String[]> likesRestantes = new ArrayList<>();
+        try (DataInputStream dis = new DataInputStream(new FileInputStream(file))) {
+            while (dis.available() > 0) {
+                String autor = dis.readUTF();
+                String fecha = dis.readUTF();
+                if (!autor.equals(post.getAutor()) || !fecha.equals(post.getFecha())) {
+                    likesRestantes.add(new String[]{autor, fecha});
+                }
+            }
+        } catch (IOException e) {
+            System.err.println("Error leyendo likes: " + e.getMessage());
+        }
+
+        try (DataOutputStream dos = new DataOutputStream(new FileOutputStream(file))) {
+            for (String[] like : likesRestantes) {
+                dos.writeUTF(like[0]);
+                dos.writeUTF(like[1]);
+            }
+        } catch (IOException e) {
+            System.err.println("Error actualizando likes: " + e.getMessage());
+        }
+        actualizarLikes(post);
+    }
+
+    public boolean haDadoLike(String usuarioLogueado, Publicacion post) {
+        String rutaLikes = fileManager.getRutaUsuario(usuarioLogueado) + "/likes.ins";
+        File file = new File(rutaLikes);
+        if (!file.exists()) return false;
+
+        try (DataInputStream dis = new DataInputStream(new FileInputStream(file))) {
+            while (dis.available() > 0) {
+                String autor = dis.readUTF();
+                String fecha = dis.readUTF();
+                if (autor.equals(post.getAutor()) && fecha.equals(post.getFecha())) {
+                    return true;
+                }
+            }
+        } catch (IOException e) {
+            return false;
+        }
+        return false;
     }
 }

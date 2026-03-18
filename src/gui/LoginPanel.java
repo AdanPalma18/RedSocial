@@ -71,10 +71,20 @@ public class LoginPanel extends JPanel {
                 mainFrame.actualizarTodo();
                 mainFrame.showPanel("feed");
             } else {
-                // Si las credenciales eran correctas pero falló el login, es por el bloqueo de sesión
                 model.Usuario u = auth.getUsuario(user);
                 if (u != null && u.getPassword().equals(pass)) {
-                    errorLabel.setText("Sesión ya abierta en otra ventana");
+                    if (!u.isActivo()) {
+                        int r = JOptionPane.showConfirmDialog(this, "¿Desea activar su cuenta?", "Cuenta Inactiva", JOptionPane.YES_NO_OPTION);
+                        if (r == JOptionPane.YES_OPTION) {
+                            auth.activarCuenta(user);
+                            auth.login(user, pass);
+                            services.InboxService.getInstance().conectarCliente(user);
+                            mainFrame.actualizarTodo();
+                            mainFrame.showPanel("feed");
+                        }
+                    } else {
+                        errorLabel.setText("Sesión ya abierta en otra ventana");
+                    }
                 } else {
                     errorLabel.setText("Usuario o contraseña incorrectos");
                 }

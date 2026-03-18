@@ -99,6 +99,13 @@ public class InboxPanel extends JPanel implements MessageBus.MessageListener {
         return panel;
     }
 
+    public void cerrarChatActual() {
+        chatActual = null;
+        if (splitPane != null) {
+            splitPane.setRightComponent(crearPanelChat());
+        }
+    }
+
     public void cargarChats() {
         chatListPanel.removeAll();
 
@@ -379,8 +386,7 @@ public class InboxPanel extends JPanel implements MessageBus.MessageListener {
             bubble.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
             
             try {
-                ImageIcon icon = new ImageIcon(new ImageIcon(mensaje.getContenido()).getImage()
-                    .getScaledInstance(120, 120, Image.SCALE_SMOOTH));
+                ImageIcon icon = StickerService.getInstance().getCachedIcon(mensaje.getContenido(), 120);
                 JLabel stickerLabel = new JLabel(icon);
                 bubble.add(stickerLabel, BorderLayout.CENTER);
             } catch (Exception e) {
@@ -451,8 +457,7 @@ public class InboxPanel extends JPanel implements MessageBus.MessageListener {
 
         for (Sticker sticker : todos) {
             String rutaImg = sticker.getRutaImagen();
-            ImageIcon iconPreview = new ImageIcon(new ImageIcon(rutaImg).getImage()
-                .getScaledInstance(60, 60, Image.SCALE_SMOOTH));
+            ImageIcon iconPreview = StickerService.getInstance().getCachedIcon(rutaImg, 60);
                 
             JButton stickerBtn = new JButton(iconPreview);
             stickerBtn.setBackground(Color.WHITE);

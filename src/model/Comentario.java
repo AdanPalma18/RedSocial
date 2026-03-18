@@ -1,6 +1,6 @@
 package model;
 
-public class Comentario {
+public class Comentario implements Interactuable {
     private String autor;
     private String texto;
     private String fecha;

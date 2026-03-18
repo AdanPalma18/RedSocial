@@ -135,7 +135,11 @@ public class PostComponent extends JPanel {
         JPanel leftActions = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
         leftActions.setBackground(Color.WHITE);
         
-        heartLabel = createActionButton(post.isLiked() ? heartFilledIcon : heartIcon, "Me gusta");
+        model.Usuario me = AuthService.getInstance().getUsuarioActual();
+        boolean inicialLiked = (me != null) && services.PostService.getInstance().haDadoLike(me.getUsername(), post);
+        post.setLiked(inicialLiked);
+
+        heartLabel = createActionButton(inicialLiked ? heartFilledIcon : heartIcon, "Me gusta");
         heartLabel.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -255,9 +259,20 @@ public class PostComponent extends JPanel {
     }
 
     private void toggleLike() {
+        model.Usuario me = AuthService.getInstance().getUsuarioActual();
+        if (me == null) return;
+
         boolean newState = !post.isLiked();
         post.setLiked(newState);
         post.setLikesCount(post.getLikesCount() + (newState ? 1 : -1));
+        
+        // Persistir en disco (Tanto el conteo como el registro de usuario)
+        if (newState) {
+            services.PostService.getInstance().registrarLike(me.getUsername(), post);
+        } else {
+            services.PostService.getInstance().removerLike(me.getUsername(), post);
+        }
+        
         heartLabel.setIcon(newState ? heartFilledIcon : heartIcon);
         likesLabel.setText(String.valueOf(post.getLikesCount()));
     }

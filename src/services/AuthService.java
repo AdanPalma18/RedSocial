@@ -52,7 +52,7 @@ public class AuthService {
                 String genero = dis.readUTF();
                 String fechaRegistro = dis.readUTF();
                 String fotoPerfil = dis.readUTF();
-                boolean activo = dis.available() > 0 ? dis.readBoolean() : true;
+                boolean activo = dis.readBoolean();
 
                 Usuario usuario;
                 if (esPublico) {
@@ -62,9 +62,14 @@ public class AuthService {
                 }
                 usuario.setActivo(activo);
                 usuariosEnMemoria.put(username, usuario);
+                
+                // Si este es el usuario logueado en esta instancia, actualizar su referencia
+                if (usuarioActual != null && usuarioActual.getUsername().equals(username)) {
+                    usuarioActual = usuario;
+                }
             }
         } catch (IOException e) {
-            // System.err.println("Error cargando usuarios: " + e.getMessage());
+            // Error silencioso si es el fin del archivo o formato antiguo
         }
     }
 
@@ -124,8 +129,7 @@ public class AuthService {
         Usuario usuario = usuariosEnMemoria.get(username);
         if (usuario != null && usuario.getPassword().equals(password)) {
             if (!usuario.isActivo()) {
-                usuario.setActivo(true);
-                reescribirArchivo(); // Persistir reactivación
+                return false; // No se puede loguear si no está activo
             }
             
             // INTENTAR BLOQUEO DE SESIÓN
@@ -187,7 +191,10 @@ public class AuthService {
     }
 
     public Usuario getUsuario(String username) {
-        cargarUsuarios();
+        // Solo cargar si no está en memoria para evitar redundancia masiva
+        if (!usuariosEnMemoria.containsKey(username)) {
+            cargarUsuarios();
+        }
         return usuariosEnMemoria.get(username);
     }
 
@@ -227,7 +234,12 @@ public class AuthService {
             u.setFotoPerfil(fotoPath);
         }
 
+        if (usuarioActual != null && usuarioActual.getUsername().equals(username)) {
+            usuarioActual = u;
+        }
+
         reescribirArchivo();
+        SocketBusClient.getInstance().notifyProfileUpdate(username);
         return true;
     }
 
@@ -267,6 +279,10 @@ public class AuthService {
         usuario.setActivo(true);
         reescribirArchivo();
         return true;
+    }
+
+    public void recargarUsuariosLocal() {
+        cargarUsuarios();
     }
 
     private void reescribirArchivo() {

@@ -1,6 +1,8 @@
 package model;
 
-public class Sticker {
+import java.io.Serializable;
+
+public class Sticker implements Serializable {
     private String nombre;
     private String rutaImagen;
 

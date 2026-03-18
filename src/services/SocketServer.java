@@ -11,7 +11,8 @@ public class SocketServer {
     private boolean running = false;
     private List<ClientHandler> clients = new ArrayList<>();
 
-    private SocketServer() {}
+    private SocketServer() {
+    }
 
     public static SocketServer getInstance() {
         if (instance == null) {
@@ -21,7 +22,8 @@ public class SocketServer {
     }
 
     public void start() {
-        if (running) return;
+        if (running)
+            return;
         running = true;
         new Thread(() -> {
             try {
@@ -34,7 +36,6 @@ public class SocketServer {
                     new Thread(handler).start();
                 }
             } catch (java.net.BindException e) {
-                // Silencioso: el puerto ya está en uso por otra ventana, está bien.
                 running = false;
             } catch (IOException e) {
                 if (running) {
@@ -47,12 +48,21 @@ public class SocketServer {
     public void stop() {
         running = false;
         try {
-            if (serverSocket != null) serverSocket.close();
+            if (serverSocket != null)
+                serverSocket.close();
             for (ClientHandler client : clients) {
                 client.close();
             }
         } catch (IOException e) {
             System.err.println("Error cerrando Socket Server: " + e.getMessage());
+        }
+    }
+
+    public void broadcast(String msg, ClientHandler sender) {
+        for (ClientHandler client : clients) {
+            if (client != sender) {
+                client.sendMessage(msg);
+            }
         }
     }
 
@@ -71,17 +81,23 @@ public class SocketServer {
             }
         }
 
+        public void sendMessage(String msg) {
+            if (writer != null) {
+                writer.println(msg);
+            }
+        }
+
         @Override
         public void run() {
             try {
                 String input;
-                writer.println("Conectado al servidor de RedSocial");
                 while ((input = reader.readLine()) != null) {
-                    System.out.println("Recibido de cliente: " + input);
-                    writer.println("Eco: " + input);
+                    if (input.startsWith("NOTIFY_PROFILE_UPDATE")) {
+                        broadcast(input, this);
+                    }
                 }
             } catch (IOException e) {
-                System.err.println("Cliente desconectado");
+                // Desconexión silenciosa
             } finally {
                 close();
             }
@@ -89,10 +105,10 @@ public class SocketServer {
 
         public void close() {
             try {
+                clients.remove(this);
                 if (reader != null) reader.close();
                 if (writer != null) writer.close();
                 if (socket != null) socket.close();
-                clients.remove(this);
             } catch (IOException e) {
                 System.err.println("Error cerrando cliente: " + e.getMessage());
             }

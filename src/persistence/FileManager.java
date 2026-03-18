@@ -124,4 +124,41 @@ public class FileManager {
             }
         }
     }
+
+    public void exportarStickersBinario(java.util.List<model.Sticker> stickers, String prefijo) {
+        String ruta = raiz + "/" + prefijo + "_stickers.dat";
+        File file = new File(ruta);
+        try (RandomAccessFile raf = new RandomAccessFile(file, "rw")) {
+            raf.setLength(0); // Limpiar archivo existente
+            raf.writeInt(stickers.size());
+            for (model.Sticker s : stickers) {
+                raf.writeUTF(s.getNombre());
+                raf.writeUTF(s.getRutaImagen());
+            }
+            System.out.println("Stickers exportados con RAF a: " + ruta);
+        } catch (IOException e) {
+            System.err.println("Error exportando stickers con RAF: " + e.getMessage());
+        }
+    }
+
+    public java.util.List<model.Sticker> importarStickersBinario(String prefijo) {
+        String ruta = raiz + "/" + prefijo + "_stickers.dat";
+        File file = new File(ruta);
+        java.util.List<model.Sticker> lista = new java.util.ArrayList<>();
+        if (!file.exists()) return lista;
+
+        try (RandomAccessFile raf = new RandomAccessFile(file, "r")) {
+            if (raf.length() > 0) {
+                int size = raf.readInt();
+                for (int i = 0; i < size; i++) {
+                    String nombre = raf.readUTF();
+                    String img = raf.readUTF();
+                    lista.add(new model.Sticker(nombre, img));
+                }
+            }
+        } catch (IOException e) {
+            System.err.println("Error importando stickers con RAF: " + e.getMessage());
+        }
+        return lista;
+    }
 }

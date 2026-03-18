@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class Publicacion {
+public class Publicacion implements Interactuable {
     private String autor;
     private String contenido;
     private String imagenRuta;
@@ -15,13 +15,18 @@ public class Publicacion {
     private boolean liked = false;
     private boolean saved = false;
     private int likesCount = 0;
-    private List<Comentario> comentarios = new ArrayList<>();
+    private utils.ListaEnlazada<Comentario> comentarios = new utils.ListaEnlazada<>();
 
     public Publicacion(String autor, String contenido, String imagenRuta, String fecha) {
+        this(autor, contenido, imagenRuta, fecha, 0);
+    }
+
+    public Publicacion(String autor, String contenido, String imagenRuta, String fecha, int likesCount) {
         this.autor = autor;
         this.contenido = contenido;
         this.imagenRuta = imagenRuta;
         this.fecha = fecha;
+        this.likesCount = likesCount;
         this.hashtags = extraerHashtags(contenido);
         this.menciones = extraerMenciones(contenido);
     }
@@ -104,11 +109,15 @@ public class Publicacion {
         this.likesCount = likesCount;
     }
 
-    public List<Comentario> getComentarios() {
+    public utils.ListaEnlazada<Comentario> getComentarios() {
         return comentarios;
     }
 
     public void agregarComentario(Comentario comentario) {
         this.comentarios.add(comentario);
+    }
+
+    public void limpiarComentarios() {
+        this.comentarios.clear();
     }
 }

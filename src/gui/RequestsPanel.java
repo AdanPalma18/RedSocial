@@ -82,10 +82,10 @@ public class RequestsPanel extends JPanel {
         ));
         item.setMaximumSize(new Dimension(Integer.MAX_VALUE, 80));
 
-        CircularImageLabel profilePic = new CircularImageLabel("", 50);
-        item.add(profilePic, BorderLayout.WEST);
-
         Usuario usuario = AuthService.getInstance().getUsuario(username);
+        String foto = (usuario != null) ? usuario.getFotoPerfil() : "";
+        CircularImageLabel profilePic = new CircularImageLabel(foto, 50);
+        item.add(profilePic, BorderLayout.WEST);
         
         JPanel textPanel = new JPanel();
         textPanel.setLayout(new BoxLayout(textPanel, BoxLayout.Y_AXIS));

@@ -86,8 +86,8 @@ public class InboxService {
                 String contenido = dis.readUTF();
                 String fecha = dis.readUTF();
                 boolean esMio = dis.readBoolean();
-                boolean esSticker = dis.available() > 0 ? dis.readBoolean() : false;
-                boolean leido = dis.available() > 0 ? dis.readBoolean() : true;
+                boolean esSticker = dis.readBoolean();
+                boolean leido = dis.readBoolean();
 
                 if (otroUsuario.equals(usuario2)) {
                     String remitente = esMio ? usuario1 : usuario2;
@@ -120,8 +120,8 @@ public class InboxService {
                 String contenido = dis.readUTF();
                 String fecha = dis.readUTF();
                 boolean esMio = dis.readBoolean();
-                boolean esSticker = dis.available() > 0 ? dis.readBoolean() : false;
-                boolean leido = dis.available() > 0 ? dis.readBoolean() : true;
+                boolean esSticker = dis.readBoolean();
+                boolean leido = dis.readBoolean();
 
                 if (otro.equals(otroUsuario) && !esMio) {
                     leido = true;
@@ -163,8 +163,8 @@ public class InboxService {
                 String contenido = dis.readUTF();
                 String fecha = dis.readUTF();
                 boolean esMio = dis.readBoolean();
-                boolean esSticker = dis.available() > 0 ? dis.readBoolean() : false;
-                boolean leido = dis.available() > 0 ? dis.readBoolean() : true;
+                boolean esSticker = dis.readBoolean();
+                boolean leido = dis.readBoolean();
 
                 if (!otro.equals(otroUsuario)) {
                     mensajesRestantes.add(new MensajeTemp(otro, contenido, fecha, esMio, esSticker, leido));
@@ -220,9 +220,9 @@ public class InboxService {
                 String otroUsuario = dis.readUTF();
                 String contenido = dis.readUTF();
                 String fecha = dis.readUTF();
-                dis.readBoolean();
-                if (dis.available() > 0) dis.readBoolean();
-                if (dis.available() > 0) dis.readBoolean();
+                dis.readBoolean(); // esMio
+                dis.readBoolean(); // esSticker
+                dis.readBoolean(); // leido
 
                 chats.put(otroUsuario, contenido);
             }
@@ -248,8 +248,8 @@ public class InboxService {
                 dis.readUTF(); // contenido
                 dis.readUTF(); // fecha
                 boolean esMio = dis.readBoolean();
-                if (dis.available() > 0) dis.readBoolean(); // esSticker
-                boolean leido = dis.available() > 0 ? dis.readBoolean() : true;
+                dis.readBoolean(); // esSticker
+                boolean leido = dis.readBoolean();
 
                 if (!esMio && !leido) {
                     count++;
@@ -275,10 +275,10 @@ public class InboxService {
             while (dis.available() > 0) {
                 String otro = dis.readUTF();
                 dis.readUTF();
-                dis.readUTF();
+                dis.readUTF(); // fecha
                 boolean esMio = dis.readBoolean();
-                if (dis.available() > 0) dis.readBoolean();
-                boolean leido = dis.available() > 0 ? dis.readBoolean() : true;
+                dis.readBoolean(); // esSticker
+                boolean leido = dis.readBoolean();
 
                 if (otro.equals(otroUsuario) && !esMio && !leido) {
                     count++;

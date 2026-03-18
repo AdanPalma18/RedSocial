@@ -2,7 +2,6 @@ package gui;
 
 import java.awt.*;
 import java.awt.event.*;
-import java.util.List;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import model.Comentario;
@@ -106,9 +105,9 @@ public class CommentsDialog extends JDialog {
 
     private void cargarComentarios() {
         commentsContainer.removeAll();
-        List<Comentario> comentarios = post.getComentarios();
+        services.PostService.getInstance().refrescarComentarios(post);
         
-        for (Comentario c : comentarios) {
+        for (Comentario c : post.getComentarios()) {
             commentsContainer.add(createCommentRow(c));
             commentsContainer.add(Box.createVerticalStrut(16));
         }
@@ -128,7 +127,7 @@ public class CommentsDialog extends JDialog {
         
         // Avatar con borde de story para estilo premium
         CircularImageLabel avatar = new CircularImageLabel(foto, 42);
-        avatar.setHasStory(true); 
+        avatar.setHasStory(false); 
         
         JPanel contentPanel = new JPanel();
         contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
